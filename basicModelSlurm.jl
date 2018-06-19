@@ -26,8 +26,7 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
     latent_ctr = zeros(Int64,P.sim_time)##vector of results latent
     symp_ctr = zeros(Int64,P.sim_time) #vector for results symp 
     asymp_ctr = zeros(Int64,P.sim_time) #vector for results asymp 
-    Incidence = zeros(Int64,15,P.sim_time) #vector for calculating the proportion
-
+  
     Fail_Contact_Matrix = zeros(Int64,15,15)
     Contact_Matrix_General = zeros(Int64,15,15)
 
@@ -44,12 +43,12 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
 
     for t=1:P.sim_time
         #if P.Model == 1
-        VI,VA,SI,SA = contact_dynamic2(humans,P,Fail_Contact_Matrix,Age_group_Matrix,Number_in_age_group,Contact_Matrix_General)
+        contact_dynamic2(humans,P,Fail_Contact_Matrix,Age_group_Matrix,Number_in_age_group,Contact_Matrix_General)
         #SuccessMatrix[:,t],FailMatrix[:,t] = contact_dynamic2(humans,P,Fail_Contact_Matrix,Age_group_Matrix,Number_in_age_group,Contact_Matrix_General,Risk_Contact,t)
         for i=1:P.grid_size_human
             increase_timestate(humans[i],P)
         end
-        latent_ctr[t],symp_ctr[t],asymp_ctr[t],Incidence[:,t]=update_human(humans,P)
+        latent_ctr[t],symp_ctr[t],asymp_ctr[t]=update_human(humans,P)
         cb(1) ## increase the progress metre by 1.. callback function
     end
     first_inf = find(x-> x.WhoInf == initial && x.WentTo == SYMP,humans)

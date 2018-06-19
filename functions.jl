@@ -3,7 +3,7 @@ function make_human_symp(h::Human, P::InfluenzaParameters)
   h.health = SYMP    # make the health ->inf
   h.swap = UNDEF
   d = LogNormal(P.log_normal_mean,sqrt(P.log_normal_shape))
-  h.statetime = min(15,ceil(rand(d)))
+  h.statetime = min(P.max_infectious_period,ceil(rand(d)))
   h.timeinstate = 0
   h.WentTo = SYMP
 end
@@ -14,7 +14,7 @@ function make_human_asymp(h::Human, P::InfluenzaParameters)
   h.health = ASYMP    # make the health ->inf
   h.swap = UNDEF
   d = LogNormal(P.log_normal_mean,sqrt(P.log_normal_shape))
-  h.statetime = min(15,ceil(rand(d)))
+  h.statetime = min(P.max_infectious_period,ceil(rand(d)))
   h.timeinstate = 0
   h.WentTo = ASYMP
 end
@@ -69,7 +69,6 @@ function update_human(h::Array{Human},P::InfluenzaParameters)
     n1::Int64 = 0
     n2::Int64 = 0
     n3::Int64 = 0
-    Incidence = zeros(Int64,15)
     for i=1:P.grid_size_human
         if h[i].swap == LAT
             make_human_latent(h[i],P)
@@ -238,13 +237,6 @@ end
 function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Matrix,Age_group_Matrix,Number_in_age_group,Contact_Matrix_General)#,Risk_Contact,t::Int64)
     NB = N_Binomial()
     ContactMatrix = ContactMatrixFunc()
-    ####Vector for risk
-    VI = zeros(Int64,15)
-    VA = zeros(Int64,15)
-    SI = zeros(Int64,15)
-    SA = zeros(Int64,15)
-    ####
-
    
     for i=1:P.grid_size_human
         if h[i].health == SUSC
@@ -255,23 +247,28 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
                 #Contact_Matrix_General[h[r].contact_group,h[i].contact_group]+=1
                 if h[r].health == SYMP
                     if h[i].vaccinationStatus == 1
-                        if rand()<(1-P.precaution_factorV)
-                            VI[h[i].contact_group] = VI[h[i].contact_group] + 1
-                            if rand() < (P.Prob_transmission*(1-h[i].vaccineEfficacy))
-                                h[i].swap = LAT
-                                h[i].WhoInf = r
-                                break
+                       # if rand()<(1-P.precaution_factorV)
+                       
+                        ###Here we need to calculate the decrease and 
+                        if rand() < (P.Prob_transmission*(1-h[i].vaccineEfficacy))
+                            TransmitingStrain = WhichOneWillTransmit()
+                            h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
+                            h[i].swap = LAT
+                            h[i].WhoInf = r
+                            break
                                 
-                            else
-                                Fail_Contact_Matrix[h[i].contact_group,h[r].contact_group]+=1
-                                h[i].NumberFails+=1
+                        else
+                            Fail_Contact_Matrix[h[i].contact_group,h[r].contact_group]+=1
+                            h[i].NumberFails+=1
                                
-                            end
                         end
+                        #end
                     else 
-                        if rand()<(1-P.precaution_factorS)
+                        #if rand()<(1-P.precaution_factorS)
                             SI[h[i].contact_group] = SI[h[i].contact_group] + 1
                             if rand()< P.Prob_transmission
+                                TransmitingStrain = WhichOneWillTransmit()
+                                h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
                                 h[i].swap = LAT
                                 h[i].WhoInf = r
                                 break
@@ -281,13 +278,14 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
                                 h[i].NumberFails+=1
                                
                             end
-                        end
+                       # end
                     end
 
                 elseif h[r].health == ASYMP
                     if h[i].vaccinationStatus == 1
-                        VA[h[i].contact_group] = VA[h[i].contact_group] + 1
                         if rand() < (P.Prob_transmission*(1-h[i].vaccineEfficacy)*(1-P.reduction_factor))
+                            TransmitingStrain = WhichOneWillTransmit()
+                            h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
                             h[i].swap = LAT
                             h[i].WhoInf = r
                             break
@@ -298,10 +296,12 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
                            
                         end
                     else 
-                        SA[h[i].contact_group] = SA[h[i].contact_group] + 1
                         if rand()< (P.Prob_transmission*(1-P.reduction_factor))
+                            TransmitingStrain = WhichOneWillTransmit()
+                            h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
                             h[i].swap = LAT
                             h[i].WhoInf = r
+
                             break
                            
                         else
@@ -316,8 +316,6 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
 
         end
     end ##close Grid human
-    return VI,VA,SI,SA 
-
 end
 
 
@@ -338,6 +336,4 @@ function finding_contact2(h::Array{Human},index::Int64,M,Age_group_Matrix,Number
     end
     
 
-end 
-
-
+end
