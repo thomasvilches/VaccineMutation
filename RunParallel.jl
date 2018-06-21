@@ -62,19 +62,19 @@ function dataprocess(results,P::InfluenzaParameters,numberofsims)
 
     directory = "May14/"
 
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_latent.dat"),resultsL)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_symp.dat"),resultsS)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_asymp.dat"),resultsA)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_R0.dat"),resultsR0)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_SympInf.dat"),resultsSymp)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_AsympInf.dat"),resultsAsymp)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_InfMatrix.dat"),Infection_Matrix)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_FailMatrix.dat"),Fail_Matrix)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_ContactMatrixGeneral.dat"),Contact_Matrix_General)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_NumAgeGroup.dat"),resultsNumAge)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_FailVector.dat"),resultsFailVector)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_InfOrNot.dat"),resultsInfOrNot)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_VacStatus.dat"),VacStatus)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_latent.dat"),resultsL)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_symp.dat"),resultsS)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_asymp.dat"),resultsA)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_R0.dat"),resultsR0)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_SympInf.dat"),resultsSymp)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_AsympInf.dat"),resultsAsymp)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_InfMatrix.dat"),Infection_Matrix)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_FailMatrix.dat"),Fail_Matrix)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_ContactMatrixGeneral.dat"),Contact_Matrix_General)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_NumAgeGroup.dat"),resultsNumAge)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_FailVector.dat"),resultsFailVector)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_InfOrNot.dat"),resultsInfOrNot)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.strains_matrix)","PS","$(P.precaution_factorS)","PV","$(P.precaution_factorV)","_VacStatus.dat"),VacStatus)
 end
 
 function run_main(P::InfluenzaParameters,numberofsims::Int64)
@@ -89,7 +89,7 @@ end
 
     precaution_factorS = 0.4,
     precaution_factorV = 0.4,
-    VaccineEfficacy = 0.8,
+    strains_matrix = 0.8,
     GeneralCoverage = 1,
     Prob_transmission = 0.079,
     sim_time = 200,

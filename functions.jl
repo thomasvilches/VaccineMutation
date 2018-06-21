@@ -241,7 +241,7 @@ end
 
 
 
-function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Matrix,Age_group_Matrix,Number_in_age_group,Contact_Matrix_General)#,Risk_Contact,t::Int64)
+function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Matrix,Age_group_Matrix,Number_in_age_group,Contact_Matrix_General,Vaccine_Strain::Array{Int64,1})
     NB = N_Binomial()
     ContactMatrix = ContactMatrixFunc()
    
@@ -249,18 +249,18 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
         if h[i].health == SUSC
             h[i].daily_contacts = rand(NB[h[i].contact_group])
             for j=1:h[i].daily_contacts
-                r =finding_contact2(h,i,ContactMatrix,Age_group_Matrix,Number_in_age_group)# rand(1:P.grid_size_human)#
+                r =finding_contact2(h,i,ContactMatrix,Age_group_Matrix,Number_in_age_group)
                 Contact_Matrix_General[h[i].contact_group,h[r].contact_group]+=1
-                #Contact_Matrix_General[h[r].contact_group,h[i].contact_group]+=1
+                available_strains = find(x -> h[r].Vector_time[x] <= (h[r].timeinstate+h[r].latenttime),1:h[r].NumberStrains)
+                VaccineEfVector = zeros(Float64,h[r].NumberStrains)
+
                 if h[r].health == SYMP
                     if h[i].vaccinationStatus == 1
-                       # if rand()<(1-P.precaution_factorV)
-                       ##########################################
-                        ###Here we need to calculate the decrease############3
-                        ##############################################
-                        if rand() < (P.Prob_transmission*(1-h[i].vaccineEfficacy))
-                            TransmitingStrain = Which_One_Will_Transmit()
-                            h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
+                        VaccineEfVector = Calculating_Efficacy(h[r].strains_matrix[available_strains,:],h[r].NumberStrains,Vaccine_Strain,h[i].vaccineEfficacy,P)
+
+                        if rand() < ProbOfTransmission(P.Prob_transmission,VaccineEfVector)
+                            TransmitingStrain = Which_One_Will_Transmit(VaccineEfVector,h[r].Vector_time[available_strains],h[r].timeinstate,h[r].latenttime)
+                            h[i].strains_matrix[1,:] =  h[r].strains_matrix[TransmitingStrain,:]
                             h[i].NumberStrains = 1
                             h[i].swap = LAT
                             h[i].WhoInf = r
@@ -271,13 +271,13 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
                             h[i].NumberFails+=1
                                
                         end
-                        #end
+                        
                     else 
-                        #if rand()<(1-P.precaution_factorS)
+                       
                             SI[h[i].contact_group] = SI[h[i].contact_group] + 1
-                            if rand()< P.Prob_transmission
-                                TransmitingStrain = WhichOneWillTransmit()
-                                h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
+                            if rand()< ProbOfTransmission(P.Prob_transmission,VaccineEfVector)
+                                TransmitingStrain = Which_One_Will_Transmit(VaccineEfVector,h[r].Vector_time[available_strains],h[r].timeinstate,h[r].latenttime)
+                                h[i].strains_matrix[1,:] =  h[r].strains_matrix[TransmitingStrain,:]
                                 h[i].NumberStrains = 1
                                 h[i].swap = LAT
                                 h[i].WhoInf = r
@@ -288,17 +288,16 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
                                 h[i].NumberFails+=1
                                
                             end
-                       # end
+                       
                     end
 
                 elseif h[r].health == ASYMP
                     if h[i].vaccinationStatus == 1
-                        #########################################
-                        ###Here we need to calculate the decrease############3
-                        ##############################################
-                        if rand() < (P.Prob_transmission*(1-h[i].vaccineEfficacy)*(1-P.reduction_factor))
-                            TransmitingStrain = WhichOneWillTransmit()
-                            h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
+                        VaccineEfVector = Calculating_Efficacy(h[r].strains_matrix[available_strains,:],h[r].NumberStrains,Vaccine_Strain,h[i].vaccineEfficacy,P)
+
+                        if rand() < ProbOfTransmission((P.Prob_transmission*(1-P.reduction_factor)),VaccineEfVector)
+                            TransmitingStrain = Which_One_Will_Transmit(VaccineEfVector,h[r].Vector_time[available_strains],h[r].timeinstate,h[r].latenttime)
+                            h[i].strains_matrix[1,:] =  h[r].strains_matrix[TransmitingStrain,:]
                             h[i].NumberStrains = 1
                             h[i].swap = LAT
                             h[i].WhoInf = r
@@ -310,13 +309,12 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
                            
                         end
                     else 
-                        if rand()< (P.Prob_transmission*(1-P.reduction_factor))
-                            TransmitingStrain = WhichOneWillTransmit()
-                            h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
+                        if rand()< ProbOfTransmission((P.Prob_transmission*(1-P.reduction_factor)),VaccineEfVector)
+                            TransmitingStrain = Which_One_Will_Transmit(VaccineEfVector,h[r].Vector_time[available_strains],h[r].timeinstate,h[r].latenttime)
+                            h[i].strains_matrix[1,:] =  h[r].strains_matrix[TransmitingStrain,:]
                             h[i].NumberStrains = 1
                             h[i].swap = LAT
                             h[i].WhoInf = r
-
                             break
                            
                         else

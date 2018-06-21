@@ -4,13 +4,13 @@ function mutation(Original_Strain1::Array{Int64,1},P::InfluenzaParameters,t::Int
     Matrix_Of_Strains = zeros(Int64,P.matrix_strain_lines,P.sequence_size) ###Returning matrix with strains
     Matrix_Of_Strains[1,:] = Original_Strain1 #setting the first one as the original infection
     Time_Strain = zeros(Int64,P.matrix_strain_lines) ### the time in which the strain was generated
-    Time_Strain[1] = 0 ### the original strain is generated at time 1
+    Time_Strain[1] = 0 ### the original strain is generated at time 0
     
 
     while j != n ##I want to do this until there is no more strains to search
         j+=1 ##going to the next strain
-        Time_Vector_Size = zeros(Int64,P.max_infectious_period) ##This vector saves the number of sites changing at that time step
-        Time_Matrix = zeros(Int64,100,P.max_infectious_period) ##This matrix saves which sites changed at a given time step
+        Time_Vector_Size = zeros(Int64,(P.max_infectious_period+P.Latent_period_Max)) ##This vector saves the number of sites changing at that time step
+        Time_Matrix = zeros(Int64,100,(P.max_infectious_period+P.Latent_period_Max)) ##This matrix saves which sites changed at a given time step
         for i = 1:P.sequence_size ###running the sites
             if Time_Strain[j]<t    
                 if rand() < CumProb[t-Time_Strain[j]] ##checking if it will change
@@ -21,7 +21,7 @@ function mutation(Original_Strain1::Array{Int64,1},P::InfluenzaParameters,t::Int
             end
         end
 
-        for time = Time_Strain[j]:t #running the time (each strain is able to create t-Time_Strain[j] strains)
+        for time = (Time_Strain[j]+1):t #running the time (each strain is able to create t-Time_Strain[j] strains)
             if Time_Vector_Size[time] > 0 ##if it has sites that changed
                 n+=1
                 Matrix_Of_Strains[n,:] = Matrix_Of_Strains[j,:] ###Copying the generating strain
@@ -86,7 +86,7 @@ function CumulativeProb(P::InfluenzaParameters)
 
     Vector_Prob = zeros(Float64,P.max_infectious_period)
 
-    for i = 1:P.max_infectious_period
+    for i = 1:(P.Latent_period_Max+P.max_infectious_period)
         Vector_Prob[i] = p*((1-p)^(i-1))
     end
 
@@ -96,4 +96,42 @@ end
 
 function Which_One_Will_Transmit()
     
+end
+
+function ProbOfTransmission(ProbTrans::Float64,VaccineEfVector::Array{Float64,1})
+
+    prob::Float64 = 1.0
+
+    for i = 1:length(VaccineEfVector)
+        prob = prob*(1-ProbTrans*(1-VaccineEfVector))
+    end
+    
+    prob = 1-prob
+    return prob
+end
+
+function Calculating_Efficacy(strains_matrix::Array{Int64,2},NumberStrains::Int64,Vaccine_Strain::Array{Int64,1},vaccineEfficacy::Float64,P::InfluenzaParameters)
+    VaccineEfVector = zeros(Float64,NumberStrains)
+    p::Float64 = 0.0
+    for i = 1:NumberStrains
+        p = Calculating_Distance_Two_Strains(strains_matrix[i,:],Vaccine_Strain)/P.sequence_size
+        VaccineEfVector[i] = vaccineEfficacy-7.37*p
+        if VaccineEfVector[i] < 0
+            VaccineEfVector[i] = 0.0
+        end
+    end
+end
+
+function Which_One_Will_Transmit(VaccineEfVector::Array{Float64,1},Vector_time::Array{Float64,1},timeinstate::Int64,latenttime::Int64)
+
+    probs = zeros(Float64,length(VaccineEfVector))
+    for i = 1:length(VaccineEfVector)
+        probs[i] = (1-VaccineEfVector[i])*(timeinstate+lattenttime-Vector_time[i]+1)
+    end
+
+    probs = probs/sum(probs)
+    probs = cumsum(probs)
+    r = rand()
+    retorno = findfirst(x->x>r,probs)
+    return retorno
 end
