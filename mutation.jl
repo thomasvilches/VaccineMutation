@@ -4,7 +4,7 @@ function mutation(Original_Strain1::Array{Int64,1},P::InfluenzaParameters,t::Int
     Matrix_Of_Strains = zeros(Int64,P.matrix_strain_lines,P.sequence_size) ###Returning matrix with strains
     Matrix_Of_Strains[1,:] = Original_Strain1 #setting the first one as the original infection
     Time_Strain = zeros(Int64,P.matrix_strain_lines) ### the time in which the strain was generated
-    Time_Strain[1] = 1 ### the original strain is generated at time 1
+    Time_Strain[1] = 0 ### the original strain is generated at time 1
     
 
     while j != n ##I want to do this until there is no more strains to search
@@ -78,4 +78,22 @@ function Calculating_Distance_Two_Strains(A::Array{Int64,1},B::Array{Int64,1})
         end
     end
     return soma
+end
+
+
+function CumulativeProb(P::InfluenzaParameters)
+    p = 1 - exp(-P.mutation_rate/365)
+
+    Vector_Prob = zeros(Float64,P.max_infectious_period)
+
+    for i = 1:P.max_infectious_period
+        Vector_Prob[i] = p*((1-p)^(i-1))
+    end
+
+    CumProb = cumsum(Vector_Prob)
+    return CumProb
+end
+
+function Which_One_Will_Transmit()
+    
 end

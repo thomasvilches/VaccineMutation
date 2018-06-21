@@ -2,6 +2,7 @@ mutable struct Human
     strains_matrix::Array{Int64,2}
     Vector_time::Array{Int64,1}
     NumberStrains::Int64
+    latenttime::Int64
     #=health::HEALTH
     swap::HEALTH #do we need  this? We can do a sequential atualization
     timeinstate::Int64

@@ -6,6 +6,9 @@ function make_human_symp(h::Human, P::InfluenzaParameters)
   h.statetime = min(P.max_infectious_period,ceil(rand(d)))
   h.timeinstate = 0
   h.WentTo = SYMP
+  t = h.statetime+h.latenttime
+  CumProb = CumulativeProb(P)
+  h.strains_matrix,h.Vector_time,h.NumberStrains = mutation(h.strains_matrix[1,:],P,t,CumProb,h.NumberStrains)
 end
 
 
@@ -17,6 +20,9 @@ function make_human_asymp(h::Human, P::InfluenzaParameters)
   h.statetime = min(P.max_infectious_period,ceil(rand(d)))
   h.timeinstate = 0
   h.WentTo = ASYMP
+  t = h.statetime+h.latenttime
+  CumProb = CumulativeProb(P)
+  h.strains_matrix,h.Vector_time,h.NumberStrains = mutation(h.strains_matrix[1,:],P,t,CumProb,h.NumberStrains)
 end
 
 
@@ -34,6 +40,7 @@ function make_human_latent(h::Human, P::InfluenzaParameters)
   h.health = LAT    # make the health ->inf
   h.swap = UNDEF
   h.statetime = rand(P.Latent_period_Min:P.Latent_period_Max)
+  h.latenttime=h.statetime  
   h.timeinstate = 0
 end
 
@@ -248,11 +255,13 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
                 if h[r].health == SYMP
                     if h[i].vaccinationStatus == 1
                        # if rand()<(1-P.precaution_factorV)
-                       
-                        ###Here we need to calculate the decrease and 
+                       ##########################################
+                        ###Here we need to calculate the decrease############3
+                        ##############################################
                         if rand() < (P.Prob_transmission*(1-h[i].vaccineEfficacy))
-                            TransmitingStrain = WhichOneWillTransmit()
+                            TransmitingStrain = Which_One_Will_Transmit()
                             h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
+                            h[i].NumberStrains = 1
                             h[i].swap = LAT
                             h[i].WhoInf = r
                             break
@@ -269,6 +278,7 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
                             if rand()< P.Prob_transmission
                                 TransmitingStrain = WhichOneWillTransmit()
                                 h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
+                                h[i].NumberStrains = 1
                                 h[i].swap = LAT
                                 h[i].WhoInf = r
                                 break
@@ -283,9 +293,13 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
 
                 elseif h[r].health == ASYMP
                     if h[i].vaccinationStatus == 1
+                        #########################################
+                        ###Here we need to calculate the decrease############3
+                        ##############################################
                         if rand() < (P.Prob_transmission*(1-h[i].vaccineEfficacy)*(1-P.reduction_factor))
                             TransmitingStrain = WhichOneWillTransmit()
                             h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
+                            h[i].NumberStrains = 1
                             h[i].swap = LAT
                             h[i].WhoInf = r
                             break
@@ -299,6 +313,7 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
                         if rand()< (P.Prob_transmission*(1-P.reduction_factor))
                             TransmitingStrain = WhichOneWillTransmit()
                             h[i].strain_matrix[1,:] =  h[r].strain_matrix[TransmitingStrain,:]
+                            h[i].NumberStrains = 1
                             h[i].swap = LAT
                             h[i].WhoInf = r
 

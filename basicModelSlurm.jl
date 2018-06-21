@@ -20,6 +20,9 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
 
     setup_human(humans)
     setup_demographic(humans,P)
+
+    Vaccine_Strain = rand(1:P.number_of_states,P.sequence_size)
+
     if P.GeneralCoverage == 1
         vaccination(humans,P)
     end

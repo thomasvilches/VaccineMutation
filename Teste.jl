@@ -42,7 +42,7 @@ setup_human(humans)
 ###### Let's test the functions and how the mutations is going
 
 TransmitingStrain = Original_Strain
-t = 15
+t = 7
 
 for i = 1:P.grid_size_human
     humans[i].strains_matrix,humans[i].Vector_time,humans[i].NumberStrains = mutation(TransmitingStrain,P,t,CumProb,1) ### t must be changed by h[i].infectious period
