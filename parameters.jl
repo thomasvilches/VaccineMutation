@@ -20,8 +20,8 @@
     log_normal_mean::Float64 = 1.0
     log_normal_shape::Float64 = 0.4356
     
-    precaution_factorS::Float64 = 0.8
-    precaution_factorV::Float64 = 0.2
+    #precaution_factorS::Float64 = 0.8
+    #precaution_factorV::Float64 = 0.2
 
     #NumberOfContactsMin = 3
     #NumberOfContactsMax = 12

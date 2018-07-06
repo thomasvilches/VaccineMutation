@@ -8,6 +8,7 @@ function make_human_symp(h::Human, P::InfluenzaParameters)
   h.WentTo = SYMP
   t = h.statetime+h.latenttime
   CumProb = CumulativeProb(P)
+  h.NumberStrains = h.NumberStrains + 1
   h.strains_matrix,h.Vector_time,h.NumberStrains = mutation(h.strains_matrix[1,:],P,t,CumProb,h.NumberStrains)
 end
 
@@ -22,6 +23,7 @@ function make_human_asymp(h::Human, P::InfluenzaParameters)
   h.WentTo = ASYMP
   t = h.statetime+h.latenttime
   CumProb = CumulativeProb(P)
+  h.NumberStrains = h.NumberStrains + 1
   h.strains_matrix,h.Vector_time,h.NumberStrains = mutation(h.strains_matrix[1,:],P,t,CumProb,h.NumberStrains)
 end
 
@@ -44,12 +46,12 @@ function make_human_latent(h::Human, P::InfluenzaParameters)
   h.timeinstate = 0
 end
 
-function setup_rand_initial_latent(h::Array{Human}, P::InfluenzaParameters)
+function setup_rand_initial_latent(h::Array{Human}, P::InfluenzaParameters,Vaccine_Strain::Array{Int64,1})
    
     randperson = rand(1:P.grid_size_human)
-      
     make_human_latent(h[randperson], P)
-   
+    h[randperson].strains_matrix[1,:] = Vaccine_Strain
+
     return randperson
 end
 
@@ -241,7 +243,7 @@ end
 
 
 
-function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Matrix,Age_group_Matrix,Number_in_age_group,Contact_Matrix_General,Vaccine_Strain::Array{Int64,1})
+function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Age_group_Matrix,Number_in_age_group,Vaccine_Strain::Array{Int64,1})
     NB = N_Binomial()
     ContactMatrix = ContactMatrixFunc()
    
@@ -250,77 +252,51 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Fail_Contact_Ma
             h[i].daily_contacts = rand(NB[h[i].contact_group])
             for j=1:h[i].daily_contacts
                 r =finding_contact2(h,i,ContactMatrix,Age_group_Matrix,Number_in_age_group)
-                Contact_Matrix_General[h[i].contact_group,h[r].contact_group]+=1
                 available_strains = find(x -> h[r].Vector_time[x] <= (h[r].timeinstate+h[r].latenttime),1:h[r].NumberStrains)
-                VaccineEfVector = zeros(Float64,h[r].NumberStrains)
+                VaccineEfVector = zeros(Float64,length(available_strains))
 
                 if h[r].health == SYMP
                     if h[i].vaccinationStatus == 1
-                        VaccineEfVector = Calculating_Efficacy(h[r].strains_matrix[available_strains,:],h[r].NumberStrains,Vaccine_Strain,h[i].vaccineEfficacy,P)
+                        VaccineEfVector = Calculating_Efficacy(h[r].strains_matrix[available_strains,:],length(available_strains),Vaccine_Strain,h[i].vaccineEfficacy,P)
 
                         if rand() < ProbOfTransmission(P.Prob_transmission,VaccineEfVector)
                             TransmitingStrain = Which_One_Will_Transmit(VaccineEfVector,h[r].Vector_time[available_strains],h[r].timeinstate,h[r].latenttime)
-                            h[i].strains_matrix[1,:] =  h[r].strains_matrix[TransmitingStrain,:]
-                            h[i].NumberStrains = 1
+                            h[i].strains_matrix[1,:] =  h[r].strains_matrix[available_strains[TransmitingStrain],:]
                             h[i].swap = LAT
                             h[i].WhoInf = r
-                            break
-                                
-                        else
-                            Fail_Contact_Matrix[h[i].contact_group,h[r].contact_group]+=1
-                            h[i].NumberFails+=1
-                               
+                            break                               
                         end
                         
                     else 
-                       
-                            SI[h[i].contact_group] = SI[h[i].contact_group] + 1
-                            if rand()< ProbOfTransmission(P.Prob_transmission,VaccineEfVector)
-                                TransmitingStrain = Which_One_Will_Transmit(VaccineEfVector,h[r].Vector_time[available_strains],h[r].timeinstate,h[r].latenttime)
-                                h[i].strains_matrix[1,:] =  h[r].strains_matrix[TransmitingStrain,:]
-                                h[i].NumberStrains = 1
-                                h[i].swap = LAT
-                                h[i].WhoInf = r
-                                break
-                              
-                            else
-                                Fail_Contact_Matrix[h[i].contact_group,h[r].contact_group]+=1
-                                h[i].NumberFails+=1
-                               
-                            end
+                            
+                        if rand()< ProbOfTransmission(P.Prob_transmission,VaccineEfVector)
+                            TransmitingStrain = Which_One_Will_Transmit(VaccineEfVector,h[r].Vector_time[available_strains],h[r].timeinstate,h[r].latenttime)
+                            h[i].strains_matrix[1,:] =  h[r].strains_matrix[available_strains[TransmitingStrain],:]
+                            h[i].swap = LAT
+                            h[i].WhoInf = r
+                            break
+                        end
                        
                     end
 
                 elseif h[r].health == ASYMP
                     if h[i].vaccinationStatus == 1
-                        VaccineEfVector = Calculating_Efficacy(h[r].strains_matrix[available_strains,:],h[r].NumberStrains,Vaccine_Strain,h[i].vaccineEfficacy,P)
+                        VaccineEfVector = Calculating_Efficacy(h[r].strains_matrix[available_strains,:],length(available_strains),Vaccine_Strain,h[i].vaccineEfficacy,P)
 
                         if rand() < ProbOfTransmission((P.Prob_transmission*(1-P.reduction_factor)),VaccineEfVector)
                             TransmitingStrain = Which_One_Will_Transmit(VaccineEfVector,h[r].Vector_time[available_strains],h[r].timeinstate,h[r].latenttime)
-                            h[i].strains_matrix[1,:] =  h[r].strains_matrix[TransmitingStrain,:]
-                            h[i].NumberStrains = 1
+                            h[i].strains_matrix[1,:] =  h[r].strains_matrix[available_strains[TransmitingStrain],:]
                             h[i].swap = LAT
                             h[i].WhoInf = r
                             break
-                           
-                        else
-                            Fail_Contact_Matrix[h[i].contact_group,h[r].contact_group]+=1
-                            h[i].NumberFails+=1
-                           
                         end
                     else 
                         if rand()< ProbOfTransmission((P.Prob_transmission*(1-P.reduction_factor)),VaccineEfVector)
                             TransmitingStrain = Which_One_Will_Transmit(VaccineEfVector,h[r].Vector_time[available_strains],h[r].timeinstate,h[r].latenttime)
-                            h[i].strains_matrix[1,:] =  h[r].strains_matrix[TransmitingStrain,:]
-                            h[i].NumberStrains = 1
+                            h[i].strains_matrix[1,:] =  h[r].strains_matrix[available_strains[TransmitingStrain],:]
                             h[i].swap = LAT
                             h[i].WhoInf = r
                             break
-                           
-                        else
-                            Fail_Contact_Matrix[h[i].contact_group,h[r].contact_group]+=1
-                            h[i].NumberFails+=1
-                           
                         end
                     end
                 end

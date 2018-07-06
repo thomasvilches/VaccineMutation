@@ -3,7 +3,7 @@ mutable struct Human
     Vector_time::Array{Int64,1}
     NumberStrains::Int64
     latenttime::Int64
-    #=health::HEALTH
+    health::HEALTH
     swap::HEALTH #do we need  this? We can do a sequential atualization
     timeinstate::Int64
     statetime::Int64
@@ -17,18 +17,18 @@ mutable struct Human
     daily_contacts::Int64
     index::Int64
     Coverage::Float64
-    NumberFails::Int64=#
+   # NumberFails::Int64
    # Human() = new(SUSC,UNDEF,0,999,0,0.0,-1,UNDEF,-1,-1,-1,0,-1,0.0,0)
 end
 
-function setup_human(h)
+function setup_human(h::Array{Human,1})
     for i = 1:length(h)
         h[i] = create_human()
     end
 end
 
 function create_human()
-    h = Human(zeros(Int64,P.matrix_strain_lines,P.sequence_size),zeros(Int64,P.matrix_strain_lines),0)
+    h = Human(zeros(Int64,P.matrix_strain_lines,P.sequence_size),zeros(Int64,P.matrix_strain_lines),0,0,SUSC,UNDEF,0,999,0,0.0,-1,UNDEF,-1,-1,-1,0,-1,0.0)
     #h.strains_matrix = zeros(Int64,P.matrix_strain_lines,P.sequence_size)
     return h
 end

@@ -56,3 +56,31 @@ DistMatrix/P.sequence_size
 B = DistMatrix[1,:]/P.sequence_size
 
 find(x-> x.NumberStrains>2,humans)
+
+
+
+########################################################3
+
+Matrix = zeros(Int64,P.matrix_strain_lines,P.sequence_size)
+Matrix[1,:] = rand(1:P.number_of_states,P.sequence_size)
+
+Matrix[2,:] = Matrix[1,:]
+
+for i = 1:30
+    aux = rand(1:P.sequence_size)
+    Matrix[2,aux] = rand(1:P.number_of_states)
+end
+
+
+Matrix[3,:] = Matrix[2,:]
+
+for i = 1:15
+    aux = rand(1:P.sequence_size)
+    Matrix[3,aux] = rand(1:P.number_of_states)
+end
+
+Calculating_Distance_Two_Strains(Matrix[1,:],Matrix[3,:])
+
+VaccineEfVector = Calculating_Efficacy(Matrix,3,Matrix[1,:],0.8,P)
+Vector_time = [0; 5; 8]
+Which_One_Will_Transmit(VaccineEfVector,Vector_time,11,2)

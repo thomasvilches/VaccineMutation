@@ -11,6 +11,7 @@ using StatsBase
 include("parameters.jl")
 include("PopStruc.jl")
 include("functions.jl")
+include("mutation.jl")
 
 function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
   
@@ -29,14 +30,8 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
     latent_ctr = zeros(Int64,P.sim_time)##vector of results latent
     symp_ctr = zeros(Int64,P.sim_time) #vector for results symp 
     asymp_ctr = zeros(Int64,P.sim_time) #vector for results asymp 
-  
-    Fail_Contact_Matrix = zeros(Int64,15,15)
-    Contact_Matrix_General = zeros(Int64,15,15)
-
-  
    
-    initial=setup_rand_initial_latent(humans,P)### for now, we are using only 1
-    
+    initial = setup_rand_initial_latent(humans,P,Vaccine_Strain)### for now, we are using only 1
     Number_in_age_group = zeros(Int64,15)
     Age_group_Matrix = Matrix{Int64}(15,P.grid_size_human)
     for i = 1:P.grid_size_human
@@ -46,7 +41,7 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
 
     for t=1:P.sim_time
         
-        contact_dynamic2(humans,P,Fail_Contact_Matrix,Age_group_Matrix,Number_in_age_group,Contact_Matrix_General,Vaccine_Strain)
+        contact_dynamic2(humans,P,Age_group_Matrix,Number_in_age_group,Vaccine_Strain)
         
         for i=1:P.grid_size_human
             increase_timestate(humans[i],P)
@@ -64,30 +59,20 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
 
     numb_first_inf = length(first_inf)
 
-    Number_in_age_group = zeros(Int64,P.grid_size_human)
-    NumberFailsAge = zeros(Int64,P.grid_size_human)
-    InfOrNot = zeros(Int64,P.grid_size_human)
-    VacStatus = zeros(Int64,P.grid_size_human)
-    Infection_Matrix = zeros(Int64,15,15)
-    #Infection_Matrix_average = zeros(Float64,15,15)
-    #Fail_Contact_Matrix_average = zeros(Float64,15,15)
+    ## Calculating the proportion of infected people in function of hamming distance
 
+    number_of_infected = sum(latent_ctr)
+    p = zeros(Float64,P.grid_size_human)
+    count::Int64 = 0
     for i = 1:P.grid_size_human
-        
-        Number_in_age_group[i] = humans[i].contact_group
-        NumberFailsAge[i] = humans[i].NumberFails
-        VacStatus[i] = humans[i].vaccinationStatus
-        if humans[i].WhoInf > 0
-            Infection_Matrix[humans[i].contact_group,humans[humans[i].WhoInf].contact_group]+=1
-            if humans[i].health == REC || humans[i].health == SYMP || humans[i].health == ASYMP || humans[i].health == LAT
-                InfOrNot[i] = 1
-            end
+        if humans[i].WhoInf >0
+            count += 1
+            p[count] = Calculating_Distance_Two_Strains(Vaccine_Strain,humans[i].strains_matrix[1,:])/P.sequence_size
         end
     end
-  
-
-    #return latent_ctr,symp_ctr,asymp_ctr,numb_first_inf,numb_symp_inf,numb_asymp_inf,Infection_Matrix,Fail_Contact_Matrix,Contact_Matrix_General,Number_in_age_group,NumberFailsAge,Risk_Contact2,Risk_Contact3,Proportion
-    return latent_ctr,symp_ctr,asymp_ctr,numb_first_inf,numb_symp_inf,numb_asymp_inf,Infection_Matrix,Fail_Contact_Matrix,Contact_Matrix_General,Number_in_age_group,NumberFailsAge,InfOrNot,VacStatus
+    
+    #return latent_ctr,symp_ctr,asymp_ctr,numb_first_inf,numb_symp_inf,numb_asymp_inf
+    return latent_ctr,symp_ctr,asymp_ctr,numb_first_inf,numb_symp_inf,numb_asymp_inf,p
 
 end
 

@@ -84,7 +84,7 @@ end
 function CumulativeProb(P::InfluenzaParameters)
     p = 1 - exp(-P.mutation_rate/365)
 
-    Vector_Prob = zeros(Float64,P.max_infectious_period)
+    Vector_Prob = zeros(Float64,P.max_infectious_period+P.Latent_period_Max)
 
     for i = 1:(P.Latent_period_Max+P.max_infectious_period)
         Vector_Prob[i] = p*((1-p)^(i-1))
@@ -94,16 +94,12 @@ function CumulativeProb(P::InfluenzaParameters)
     return CumProb
 end
 
-function Which_One_Will_Transmit()
-    
-end
-
 function ProbOfTransmission(ProbTrans::Float64,VaccineEfVector::Array{Float64,1})
 
     prob::Float64 = 1.0
 
     for i = 1:length(VaccineEfVector)
-        prob = prob*(1-ProbTrans*(1-VaccineEfVector))
+        prob = prob*(1-ProbTrans*(1-VaccineEfVector[i]))
     end
     
     prob = 1-prob
@@ -120,15 +116,16 @@ function Calculating_Efficacy(strains_matrix::Array{Int64,2},NumberStrains::Int6
             VaccineEfVector[i] = 0.0
         end
     end
+    return VaccineEfVector
 end
 
-function Which_One_Will_Transmit(VaccineEfVector::Array{Float64,1},Vector_time::Array{Float64,1},timeinstate::Int64,latenttime::Int64)
+function Which_One_Will_Transmit(VaccineEfVector::Array{Float64,1},Vector_time::Array{Int64,1},timeinstate::Int64,latenttime::Int64)
 
     probs = zeros(Float64,length(VaccineEfVector))
     for i = 1:length(VaccineEfVector)
-        probs[i] = (1-VaccineEfVector[i])*(timeinstate+lattenttime-Vector_time[i]+1)
+        probs[i] = (1-VaccineEfVector[i])*(timeinstate+latenttime-Vector_time[i]+1)
     end
-
+  
     probs = probs/sum(probs)
     probs = cumsum(probs)
     r = rand()
