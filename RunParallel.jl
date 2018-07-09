@@ -32,17 +32,14 @@ function dataprocess(results,P::InfluenzaParameters,numberofsims)
         resultsL[:,i] = results[i][1]
         resultsS[:,i] = results[i][2]
         resultsA[:,i] = results[i][3]
-      
-       
         resultsR0[i] = results[i][4]
         resultsSymp[i] = results[i][5]
         resultsAsymp[i] = results[i][6]
-
         resultsP[:,i] = results[i][7]
 
     end
    
-    directory = "July6/"
+    directory = "July9/"
 
     writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","_latent.dat"),resultsL)
     writedlm(string("$directory","result","$(P.Prob_transmission)","Ef","$(P.VaccineEfficacy)","_symp.dat"),resultsS)
@@ -63,8 +60,8 @@ end
 
 @everywhere P=InfluenzaParameters(
 
-    VaccineEfficacy = 0.2,
-    GeneralCoverage = 1,
+    VaccineEfficacy = 0.0,
+    GeneralCoverage = 0,
     Prob_transmission = 0.079,
     sim_time = 200,
     grid_size_human = 10000

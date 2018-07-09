@@ -19,7 +19,7 @@ include("functions.jl")
 P = InfluenzaParameters(
     mutation_rate = 0.00416,
     matrix_strain_lines = 10,
-    grid_size_human = 1760
+    grid_size_human = 7100
 
 )
 
@@ -40,13 +40,15 @@ humans = Array{Human}(P.grid_size_human)
 setup_human(humans)
 
 ###### Let's test the functions and how the mutations is going
-
+Vaccine_Strain = Original_Strain
 TransmitingStrain = Original_Strain
 t = 7
 
 for i = 1:P.grid_size_human
-    humans[i].strains_matrix,humans[i].Vector_time,humans[i].NumberStrains = mutation(TransmitingStrain,P,t,CumProb,1) ### t must be changed by h[i].infectious period
-    transm = rand(1:humans[i].NumberStrains)
+    humans[i].strains_matrix,humans[i].Vector_time,humans[i].NumberStrains = mutation(TransmitingStrain,P,t,CumProb,1) ### t must be changed by humans[i].infectious period
+    available_strains = 1:humans[i].NumberStrains
+    VaccineEfVector = Calculating_Efficacy(humans[i].strains_matrix[available_strains,:],length(available_strains),Vaccine_Strain,0.0,P)
+    transm = Which_One_Will_Transmit(VaccineEfVector,humans[i].Vector_time[available_strains],8,2)#rand(1:humans[i].NumberStrains)
     TransmitingStrain = humans[i].strains_matrix[transm,:]
 end
 

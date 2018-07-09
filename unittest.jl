@@ -12,7 +12,6 @@ include("functions.jl")
 
 
 sigma1 = 0.4
-
 ef1 = 0.4
 P=InfluenzaParameters(
     precaution_factorS = sigma1,

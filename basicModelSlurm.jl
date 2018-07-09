@@ -65,7 +65,7 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
     p = zeros(Float64,P.grid_size_human)
     count::Int64 = 0
     for i = 1:P.grid_size_human
-        if humans[i].WhoInf >0
+        if humans[i].WhoInf > 0
             count += 1
             p[count] = Calculating_Distance_Two_Strains(Vaccine_Strain,humans[i].strains_matrix[1,:])/P.sequence_size
         end

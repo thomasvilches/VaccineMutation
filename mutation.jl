@@ -121,7 +121,7 @@ end
 
 function Which_One_Will_Transmit(VaccineEfVector::Array{Float64,1},Vector_time::Array{Int64,1},timeinstate::Int64,latenttime::Int64)
 
-    probs = zeros(Float64,length(VaccineEfVector))
+    probs = zeros(Float64,length(VaccineEfVector))#ones(Float64,length(VaccineEfVector))# 
     for i = 1:length(VaccineEfVector)
         probs[i] = (1-VaccineEfVector[i])*(timeinstate+latenttime-Vector_time[i]+1)
     end
