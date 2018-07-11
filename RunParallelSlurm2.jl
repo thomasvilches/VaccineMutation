@@ -74,16 +74,16 @@ function run_main(P::InfluenzaParameters,numberofsims::Int64)
     dataprocess(results,P,numberofsims)
 end
 
+for Vef = 0.2:0.05:0.8
+    P=InfluenzaParameters(
+        VaccineEfficacy = $Vef,
+        GeneralCoverage = 1,
+        Prob_transmission = 0.079,
+        sim_time = 300,
+        grid_size_human = 10000,
+        mutation_rate = 0.00416
+    )
 
-@everywhere P=InfluenzaParameters(
+    run_main(P,1000)
 
-    VaccineEfficacy = 0.2,
-    GeneralCoverage = 1,
-    Prob_transmission = 0.079,
-    sim_time = 200,
-    grid_size_human = 1000,
-    mutation_rate = 0.00416
-
-)
-
-run_main(P,100)
+end

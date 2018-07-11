@@ -30,7 +30,8 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
     latent_ctr = zeros(Int64,P.sim_time)##vector of results latent
     symp_ctr = zeros(Int64,P.sim_time) #vector for results symp 
     asymp_ctr = zeros(Int64,P.sim_time) #vector for results asymp 
-   
+    gd_ctr = zeros(Float64,P.sim_time) #vector for results genetic distance
+
     initial = setup_rand_initial_latent(humans,P,Vaccine_Strain)### for now, we are using only 1
     Number_in_age_group = zeros(Int64,15)
     Age_group_Matrix = Matrix{Int64}(15,P.grid_size_human)
@@ -46,7 +47,7 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
         for i=1:P.grid_size_human
             increase_timestate(humans[i],P)
         end
-        latent_ctr[t],symp_ctr[t],asymp_ctr[t]=update_human(humans,P)
+        latent_ctr[t],symp_ctr[t],asymp_ctr[t],gd_ctr[t]=update_human(humans,P,Vaccine_Strain)
         cb(1) ## increase the progress metre by 1.. callback function
     end
     first_inf = find(x-> x.WhoInf == initial && x.WentTo == SYMP,humans)
@@ -61,18 +62,18 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
 
     ## Calculating the proportion of infected people in function of hamming distance
 
-    number_of_infected = sum(latent_ctr)
+    #number_of_infected = sum(latent_ctr)
     p = zeros(Float64,P.grid_size_human)
     count::Int64 = 0
     for i = 1:P.grid_size_human
         if humans[i].WhoInf > 0
             count += 1
-            p[count] = Calculating_Distance_Two_Strains(Vaccine_Strain,humans[i].strains_matrix[1,:])/P.sequence_size
+            p[count] = Calculating_Distance_Two_Strains(Vaccine_Strain,humans[i].strains_matrix[1,:])#/P.sequence_size
         end
     end
     
     #return latent_ctr,symp_ctr,asymp_ctr,numb_first_inf,numb_symp_inf,numb_asymp_inf
-    return latent_ctr,symp_ctr,asymp_ctr,numb_first_inf,numb_symp_inf,numb_asymp_inf,p
+    return latent_ctr,symp_ctr,asymp_ctr,numb_first_inf,numb_symp_inf,numb_asymp_inf,p,gd_ctr
 
 end
 

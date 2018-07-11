@@ -74,14 +74,18 @@ function increase_timestate(h::Human,P::InfluenzaParameters)
 
 end
 
-function update_human(h::Array{Human},P::InfluenzaParameters)
+function update_human(h::Array{Human},P::InfluenzaParameters,Vaccine_Strain::Array{Int64,1})
     n1::Int64 = 0
     n2::Int64 = 0
     n3::Int64 = 0
+    gd_mean::Float64 = 0.0
+
     for i=1:P.grid_size_human
         if h[i].swap == LAT
             make_human_latent(h[i],P)
             n1+=1
+            gd_mean += (Calculating_Distance_Two_Strains(Vaccine_Strain,h[i].strains_matrix[1,:])/P.sequence_size)
+           
         else
             if h[i].swap == SYMP
             make_human_symp(h[i],P)
@@ -97,7 +101,12 @@ function update_human(h::Array{Human},P::InfluenzaParameters)
             end
         end
     end
-    return n1,n2,n3
+    if n1 > 0
+        gd_mean = gd_mean/n1
+    else 
+        gd_mean = 0.0
+    end
+    return n1,n2,n3,gd_mean
 end
 
 function vaccination(h::Array{Human},P::InfluenzaParameters)
