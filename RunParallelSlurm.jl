@@ -38,33 +38,28 @@ function dataprocess(results,P::InfluenzaParameters,numberofsims)
     resultsS = Matrix{Int64}(P.sim_time,numberofsims)
     resultsGD = Matrix{Float64}(P.sim_time,numberofsims)
     resultsR0 = Vector{Int64}(numberofsims)
-    resultsSymp = Vector{Int64}(numberofsims)
-    resultsAsymp = Vector{Int64}(numberofsims)
     
-    resultsP = Matrix{Float64}(P.grid_size_human,numberofsims)
-
+    resultsP = Matrix{Float64}(P.matrix_strain_lines,numberofsims)
+    resultsEf = Matrix{Float64}(P.grid_size_human,numberofsims)
     for i=1:numberofsims
         resultsL[:,i] = results[i][1]
         resultsS[:,i] = results[i][2]
         resultsA[:,i] = results[i][3]
         resultsR0[i] = results[i][4]
-        resultsSymp[i] = results[i][5]
-        resultsAsymp[i] = results[i][6]
-        resultsP[:,i] = results[i][7]
-        resultsGD[:,i] = results[i][8]
-
+        resultsP[:,i] = results[i][5]
+        resultsGD[:,i] = results[i][6]
+        resultsEf[:,i] = results[i][7]
     end
    
-    directory = "July10/"
+    directory = "July19/results2/"
 
     writedlm(string("$directory","result","$(P.Prob_transmission)","Mut","$(P.mutation_rate)","Ef","$(P.VaccineEfficacy)","_latent.dat"),resultsL)
     writedlm(string("$directory","result","$(P.Prob_transmission)","Mut","$(P.mutation_rate)","Ef","$(P.VaccineEfficacy)","_symp.dat"),resultsS)
     writedlm(string("$directory","result","$(P.Prob_transmission)","Mut","$(P.mutation_rate)","Ef","$(P.VaccineEfficacy)","_asymp.dat"),resultsA)
     writedlm(string("$directory","result","$(P.Prob_transmission)","Mut","$(P.mutation_rate)","Ef","$(P.VaccineEfficacy)","_R0.dat"),resultsR0)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Mut","$(P.mutation_rate)","Ef","$(P.VaccineEfficacy)","_SympInf.dat"),resultsSymp)
-    writedlm(string("$directory","result","$(P.Prob_transmission)","Mut","$(P.mutation_rate)","Ef","$(P.VaccineEfficacy)","_AsympInf.dat"),resultsAsymp)
     writedlm(string("$directory","result","$(P.Prob_transmission)","Mut","$(P.mutation_rate)","Ef","$(P.VaccineEfficacy)","_P.dat"),resultsP)
     writedlm(string("$directory","result","$(P.Prob_transmission)","Mut","$(P.mutation_rate)","Ef","$(P.VaccineEfficacy)","_GD.dat"),resultsGD)
+    writedlm(string("$directory","result","$(P.Prob_transmission)","Mut","$(P.mutation_rate)","Ef","$(P.VaccineEfficacy)","_Ef.dat"),resultsEf)
 end
 
 function run_main(P::InfluenzaParameters,numberofsims::Int64)
@@ -82,8 +77,8 @@ end
     Prob_transmission = 0.079,
     sim_time = 200,
     grid_size_human = 1000,
-    mutation_rate = 0.00416
+    mutation_rate = 0.3
 
 )
 
-run_main(P,100)
+run_main(P,1000)

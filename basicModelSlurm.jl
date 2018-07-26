@@ -17,12 +17,12 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
   
     humans = Array{Human}(P.grid_size_human)
     
-    srand(100*simulationNumber)
+   # srand(100*simulationNumber)
 
     setup_human(humans)
     setup_demographic(humans,P)
-
-    Vaccine_Strain = rand(1:P.number_of_states,P.sequence_size)
+    Vaccine_Strain = Vector{Int8}(P.sequence_size)
+    Creating_Vaccine_Vector(Vaccine_Strain,P)
 
     if P.GeneralCoverage == 1
         vaccination(humans,P)
@@ -47,33 +47,31 @@ function main(cb,simulationNumber::Int64,P::InfluenzaParameters)
         for i=1:P.grid_size_human
             increase_timestate(humans[i],P)
         end
-        latent_ctr[t],symp_ctr[t],asymp_ctr[t],gd_ctr[t]=update_human(humans,P,Vaccine_Strain)
+        latent_ctr[t],symp_ctr[t],asymp_ctr[t],gd_ctr[t]= update_human(humans,P,Vaccine_Strain)
         cb(1) ## increase the progress metre by 1.. callback function
     end
     first_inf = find(x-> x.WhoInf == initial && x.WentTo == SYMP,humans)
-
-    symp_inf = find(x -> x.WhoInf>0 && humans[x.WhoInf].WentTo == SYMP,humans)
-    numb_symp_inf = length(symp_inf)
-
-    asymp_inf = find(x -> x.WhoInf>0 && humans[x.WhoInf].WentTo == ASYMP,humans)
-    numb_asymp_inf = length(asymp_inf)
 
     numb_first_inf = length(first_inf)
 
     ## Calculating the proportion of infected people in function of hamming distance
 
     #number_of_infected = sum(latent_ctr)
-    p = zeros(Float64,P.grid_size_human)
+    p = zeros(Int64,P.matrix_strain_lines)
+    Ef = zeros(Float64,P.grid_size_human)
     count::Int64 = 0
     for i = 1:P.grid_size_human
         if humans[i].WhoInf > 0
             count += 1
-            p[count] = Calculating_Distance_Two_Strains(Vaccine_Strain,humans[i].strains_matrix[1,:])#/P.sequence_size
+            p[Int64(Calculating_Distance_Two_Strains(Vaccine_Strain,humans[i].strains_matrix[1,:]))+1]+=1
+            auxMatrix = Matrix{Int8}(1,P.sequence_size)
+            auxMatrix[1,:] = humans[i].strains_matrix[1,:]
+            Ef[count] = Calculating_Efficacy(auxMatrix,1,Vaccine_Strain,humans[i].vaccineEfficacy,P)[1]
         end
     end
     
     #return latent_ctr,symp_ctr,asymp_ctr,numb_first_inf,numb_symp_inf,numb_asymp_inf
-    return latent_ctr,symp_ctr,asymp_ctr,numb_first_inf,numb_symp_inf,numb_asymp_inf,p,gd_ctr
+    return latent_ctr,symp_ctr,asymp_ctr,numb_first_inf,p,gd_ctr,Ef
 
 end
 

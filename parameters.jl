@@ -30,7 +30,7 @@
     VaccineEfficacy::Float64 = 0.2
     
     mutation_rate::Float64 = 0.00416
-    matrix_strain_lines = 10
+    matrix_strain_lines = 30
     number_of_states = 20
     sequence_size = 566
 end

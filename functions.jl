@@ -7,9 +7,8 @@ function make_human_symp(h::Human, P::InfluenzaParameters)
   h.timeinstate = 0
   h.WentTo = SYMP
   t = h.statetime+h.latenttime
-  CumProb = CumulativeProb(P)
   h.NumberStrains = h.NumberStrains + 1
-  h.strains_matrix,h.Vector_time,h.NumberStrains = mutation(h.strains_matrix[1,:],P,t,CumProb,h.NumberStrains)
+  h.strains_matrix,h.Vector_time,h.NumberStrains = mutation(h.strains_matrix[1,:],P,t,h.NumberStrains)
 end
 
 
@@ -22,9 +21,8 @@ function make_human_asymp(h::Human, P::InfluenzaParameters)
   h.timeinstate = 0
   h.WentTo = ASYMP
   t = h.statetime+h.latenttime
-  CumProb = CumulativeProb(P)
   h.NumberStrains = h.NumberStrains + 1
-  h.strains_matrix,h.Vector_time,h.NumberStrains = mutation(h.strains_matrix[1,:],P,t,CumProb,h.NumberStrains)
+  h.strains_matrix,h.Vector_time,h.NumberStrains = mutation(h.strains_matrix[1,:],P,t,h.NumberStrains)
 end
 
 
@@ -46,7 +44,7 @@ function make_human_latent(h::Human, P::InfluenzaParameters)
   h.timeinstate = 0
 end
 
-function setup_rand_initial_latent(h::Array{Human}, P::InfluenzaParameters,Vaccine_Strain::Array{Int64,1})
+function setup_rand_initial_latent(h::Array{Human}, P::InfluenzaParameters,Vaccine_Strain::Array{Int8,1})
    
     randperson = rand(1:P.grid_size_human)
     make_human_latent(h[randperson], P)
@@ -74,7 +72,7 @@ function increase_timestate(h::Human,P::InfluenzaParameters)
 
 end
 
-function update_human(h::Array{Human},P::InfluenzaParameters,Vaccine_Strain::Array{Int64,1})
+function update_human(h::Array{Human},P::InfluenzaParameters,Vaccine_Strain::Array{Int8,1})
     n1::Int64 = 0
     n2::Int64 = 0
     n3::Int64 = 0
@@ -84,7 +82,7 @@ function update_human(h::Array{Human},P::InfluenzaParameters,Vaccine_Strain::Arr
         if h[i].swap == LAT
             make_human_latent(h[i],P)
             n1+=1
-            gd_mean += (Calculating_Distance_Two_Strains(Vaccine_Strain,h[i].strains_matrix[1,:])/P.sequence_size)
+            gd_mean += (Calculating_Distance_Two_Strains(Vaccine_Strain,h[i].strains_matrix[1,:]))
            
         else
             if h[i].swap == SYMP
@@ -252,7 +250,7 @@ end
 
 
 
-function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Age_group_Matrix,Number_in_age_group,Vaccine_Strain::Array{Int64,1})
+function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Age_group_Matrix,Number_in_age_group,Vaccine_Strain::Array{Int8,1})
     NB = N_Binomial()
     ContactMatrix = ContactMatrixFunc()
    
@@ -261,7 +259,7 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Age_group_Matri
             h[i].daily_contacts = rand(NB[h[i].contact_group])
             for j=1:h[i].daily_contacts
                 r =finding_contact2(h,i,ContactMatrix,Age_group_Matrix,Number_in_age_group)
-                available_strains = find(x -> h[r].Vector_time[x] <= (h[r].timeinstate+h[r].latenttime),1:h[r].NumberStrains)
+                available_strains = find(x -> h[r].Vector_time[x] < (h[r].timeinstate+h[r].latenttime),1:h[r].NumberStrains)
                 VaccineEfVector = zeros(Float64,length(available_strains))
 
                 if h[r].health == SYMP
