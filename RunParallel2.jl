@@ -26,7 +26,7 @@ function dataprocess(results,P::InfluenzaParameters,numberofsims)
     resultsR0 = Vector{Int64}(numberofsims)
     
     resultsP = Matrix{Float64}(P.matrix_strain_lines,numberofsims)
-    resultsEf = Matrix{Float64}(P.grid_size_human,numberofsims)
+    resultsEf = Matrix{Float64}(P.matrix_strain_lines,numberofsims)
     for i=1:numberofsims
         resultsL[:,i] = results[i][1]
         resultsS[:,i] = results[i][2]

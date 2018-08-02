@@ -45,12 +45,26 @@ function make_human_latent(h::Human, P::InfluenzaParameters)
 end
 
 function setup_rand_initial_latent(h::Array{Human}, P::InfluenzaParameters,Vaccine_Strain::Array{Int8,1})
-   
-    randperson = rand(1:P.grid_size_human)
+    
+    randperson = Selecting_Person(h)
+
     make_human_latent(h[randperson], P)
     h[randperson].strains_matrix[1,:] = Vaccine_Strain
 
     return randperson
+end
+
+function Selecting_Person(h::Array{Human})
+    aux::Int64 = 0
+    randperson::Int64 = 1
+    while aux == 0
+        randperson = rand(1:P.grid_size_human)
+        if h[randperson].health != LAT
+            aux = 1
+        end
+    end
+    return randperson
+    
 end
 
 function increase_timestate(h::Human,P::InfluenzaParameters)
@@ -259,10 +273,10 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Age_group_Matri
             h[i].daily_contacts = rand(NB[h[i].contact_group])
             for j=1:h[i].daily_contacts
                 r =finding_contact2(h,i,ContactMatrix,Age_group_Matrix,Number_in_age_group)
-                available_strains = find(x -> h[r].Vector_time[x] < (h[r].timeinstate+h[r].latenttime),1:h[r].NumberStrains)
-                VaccineEfVector = zeros(Float64,length(available_strains))
-
                 if h[r].health == SYMP
+                    available_strains = find(x -> h[r].Vector_time[x] < (h[r].timeinstate+h[r].latenttime) && h[r].Vector_time[x] < (h[r].statetime/2.0+h[r].latenttime),1:h[r].NumberStrains)
+                    VaccineEfVector = zeros(Float64,length(available_strains))
+
                     if h[i].vaccinationStatus == 1
                         VaccineEfVector = Calculating_Efficacy(h[r].strains_matrix[available_strains,:],length(available_strains),Vaccine_Strain,h[i].vaccineEfficacy,P)
 
@@ -287,6 +301,9 @@ function contact_dynamic2(h::Array{Human},P::InfluenzaParameters,Age_group_Matri
                     end
 
                 elseif h[r].health == ASYMP
+                    available_strains = find(x -> h[r].Vector_time[x] < (h[r].timeinstate+h[r].latenttime) && h[r].Vector_time[x] < (h[r].statetime/2.0+h[r].latenttime),1:h[r].NumberStrains)
+                    VaccineEfVector = zeros(Float64,length(available_strains))
+
                     if h[i].vaccinationStatus == 1
                         VaccineEfVector = Calculating_Efficacy(h[r].strains_matrix[available_strains,:],length(available_strains),Vaccine_Strain,h[i].vaccineEfficacy,P)
 

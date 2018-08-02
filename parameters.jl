@@ -33,6 +33,11 @@
     matrix_strain_lines = 30
     number_of_states = 20
     sequence_size = 566
+    initial_p::Float64 = 0.0
+    initial_p::Float64 = 0.0
+    initial_p2::Float64 = 0.0
+    initial_p3::Float64 = 0.0
+    start_different = 0
 end
 
 

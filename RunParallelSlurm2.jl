@@ -39,7 +39,7 @@ function dataprocess(results,P::InfluenzaParameters,numberofsims)
     resultsR0 = Vector{Int64}(numberofsims)
     
     resultsP = Matrix{Float64}(P.matrix_strain_lines,numberofsims)
-    resultsEf = Matrix{Float64}(P.grid_size_human,numberofsims)
+    resultsEf = Matrix{Float64}(P.matrix_strain_lines,numberofsims)
     for i=1:numberofsims
         resultsL[:,i] = results[i][1]
         resultsS[:,i] = results[i][2]
@@ -50,7 +50,7 @@ function dataprocess(results,P::InfluenzaParameters,numberofsims)
         resultsEf[:,i] = results[i][7]
     end
    
-    directory = "July26/results/"
+    directory = "July27/results/"
 
     writedlm(string("$directory","result","$(P.Prob_transmission)","Mut","$(P.mutation_rate)","Ef","$(P.VaccineEfficacy)","_latent.dat"),resultsL)
     writedlm(string("$directory","result","$(P.Prob_transmission)","Mut","$(P.mutation_rate)","Ef","$(P.VaccineEfficacy)","_symp.dat"),resultsS)
@@ -76,8 +76,8 @@ for Vef = 0.2:0.1:0.8
         Prob_transmission = 0.079,
         sim_time = 200,
         grid_size_human = 1000,
-        mutation_rate = 0.35,
-        matrix_strain_lines = 1000
+        mutation_rate = 0.3,
+        matrix_strain_lines = 1100
     )
 
     run_main(P,1000)

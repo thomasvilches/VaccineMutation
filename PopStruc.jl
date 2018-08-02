@@ -4,7 +4,7 @@ mutable struct Human
     NumberStrains::Int64
     latenttime::Int64
     health::HEALTH
-    swap::HEALTH #do we need  this? We can do a sequential atualization
+    swap::HEALTH
     timeinstate::Int64
     statetime::Int64
     vaccinationStatus::Int64
