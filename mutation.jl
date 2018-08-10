@@ -15,7 +15,7 @@ function mutation(Original_Strain1::Array{Int8,1},P::InfluenzaParameters,t::Int6
             probability = (1-exp(-1.0*P.mutation_rate*(t-Time_Strain[j])/365.0))
             for i = 1:P.sequence_size ###running the sites
                 if rand() < probability#CumProb[t-Time_Strain[j]] ##checking if it will change
-                    time = rand(Time_Strain[j]+1:t) ###selecting a random time step to change it
+                    time = rand((Time_Strain[j]+1):t) ###selecting a random time step to change it
                     Time_Vector_Size[time]+=1 ###increasing the number of sites that changed at time step "time"
                     Time_Matrix[Time_Vector_Size[time],time] = i ##saving the site
                 end
@@ -83,14 +83,8 @@ function Calculating_Distance_Two_Strains(A::Array{Int8,1},B::Array{Int8,1})
 end
 
 function ProbOfTransmission(ProbTrans::Float64,VaccineEfVector::Array{Float64,1})
-
-    prob::Float64 = 1.0
-
-    for i = 1:length(VaccineEfVector)
-        prob = prob*(1-ProbTrans*(1-VaccineEfVector[i]))
-    end
-    
-    prob = 1-prob
+    Mean1::Float64 = sum(VaccineEfVector)/length(VaccineEfVector)
+    prob::Float64 = ProbTrans*(1-Mean1)
     return prob
 end
 
@@ -111,7 +105,7 @@ function Which_One_Will_Transmit(VaccineEfVector::Array{Float64,1},Vector_time::
 
     probs = zeros(Float64,length(VaccineEfVector))#ones(Float64,length(VaccineEfVector))# 
     for i = 1:length(VaccineEfVector)
-        probs[i] = (1-VaccineEfVector[i])^(1/(timeinstate+latenttime-Vector_time[i]))
+        probs[i] = (1-VaccineEfVector[i])*(timeinstate+latenttime-Vector_time[i])
     end
   
     probs = probs/sum(probs)

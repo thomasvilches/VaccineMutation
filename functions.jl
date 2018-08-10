@@ -27,29 +27,31 @@ end
 
 
 
-function make_human_recovered(h::Human, P::InfluenzaParameters)
+function make_human_recovered(h::Human, P::InfluenzaParameters,t::Int64)
     ## make the i'th human recovered
   h.health = REC    # make the health -> latent
   h.swap = UNDEF
   h.statetime = 999
   h.timeinstate = 0
+  h.RecoveredOn = t
 end
 
-function make_human_latent(h::Human, P::InfluenzaParameters)
+function make_human_latent(h::Human, P::InfluenzaParameters,t::Int64)
     ## make the i'th human infected
   h.health = LAT    # make the health ->inf
   h.swap = UNDEF
   h.statetime = rand(P.Latent_period_Min:P.Latent_period_Max)
   h.latenttime=h.statetime  
   h.timeinstate = 0
+  h.InfectedOn = t
 end
 
-function setup_rand_initial_latent(h::Array{Human}, P::InfluenzaParameters,Vaccine_Strain::Array{Int8,1})
+function setup_rand_initial_latent(h::Array{Human}, P::InfluenzaParameters,Original_Strain::Array{Int8,1},t::Int64)
     
     randperson = Selecting_Person(h)
 
-    make_human_latent(h[randperson], P)
-    h[randperson].strains_matrix[1,:] = Vaccine_Strain
+    make_human_latent(h[randperson], P,t)
+    h[randperson].strains_matrix[1,:] = Original_Strain
 
     return randperson
 end
@@ -86,7 +88,7 @@ function increase_timestate(h::Human,P::InfluenzaParameters)
 
 end
 
-function update_human(h::Array{Human},P::InfluenzaParameters,Vaccine_Strain::Array{Int8,1})
+function update_human(h::Array{Human},P::InfluenzaParameters,Vaccine_Strain::Array{Int8,1},t::Int64)
     n1::Int64 = 0
     n2::Int64 = 0
     n3::Int64 = 0
@@ -94,7 +96,8 @@ function update_human(h::Array{Human},P::InfluenzaParameters,Vaccine_Strain::Arr
 
     for i=1:P.grid_size_human
         if h[i].swap == LAT
-            make_human_latent(h[i],P)
+            make_human_latent(h[i],P,t)
+            
             n1+=1
             gd_mean += (Calculating_Distance_Two_Strains(Vaccine_Strain,h[i].strains_matrix[1,:]))
            
@@ -107,7 +110,8 @@ function update_human(h::Array{Human},P::InfluenzaParameters,Vaccine_Strain::Arr
                     make_human_asymp(h[i],P)
                     n3+=1
                 elseif h[i].swap == REC
-                    make_human_recovered(h[i],P)
+                    make_human_recovered(h[i],P,t)
+                    
                 end
 
             end

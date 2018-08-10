@@ -158,3 +158,20 @@ function main(simulationNumber::Int64,P::InfluenzaParameters)
 
 end
 
+    Mod_Strain = Vector{Int8}(P.sequence_size)
+    for i = 1:P.sequence_size
+        Mod_Strain[i] = Vaccine_Strain[i]
+    end
+    for i = 1:1:(round(0.0*566))
+       
+        aux = rand(1:P.sequence_size)
+        println("$i $aux")
+
+    end
+        change = Mod_Strain[aux]
+        while change == Mod_Strain[aux]
+            change = rand(1:P.number_of_states)
+        end
+        Mod_Strain[aux] = change
+    end
+    Mod = setup_rand_initial_latent(humans,P,Mod_Strain,0)
